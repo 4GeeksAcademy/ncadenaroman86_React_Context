@@ -39,13 +39,39 @@ export default function AddContactPage() {
     }
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
+    const url = "https://playground.4geeks.com/apis/fake/contact/";
+
+    const newContact = {
+      full_name: form.full_name,
+      email: form.email,
+      agenda_slug: "nelson_agenda",
+      address: form.address,
+      phone: form.phone
+    };
+
     if (id) {
-      dispatch({ type: "UPDATE_CONTACT", payload: form });
+      await fetch(`${url}${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newContact)
+      });
+      dispatch({ type: "UPDATE_CONTACT", payload: { ...form } });
     } else {
-      dispatch({ type: "ADD_CONTACT", payload: { ...form, id: crypto.randomUUID() } });
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newContact)
+      });
+      const data = await res.json();
+      dispatch({ type: "ADD_CONTACT", payload: { ...form, id: data.id } });
     }
+
     navigate("/");
   };
 
@@ -84,10 +110,10 @@ export default function AddContactPage() {
         />
       </div>
 
-      <input className="form-control mb-3" name="full_name" placeholder="Full Name" value={form.full_name} onChange={handleChange} />
-      <input className="form-control mb-3" name="email" placeholder="Email" value={form.email} onChange={handleChange} />
-      <input className="form-control mb-3" name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} />
-      <input className="form-control mb-3" name="address" placeholder="Address" value={form.address} onChange={handleChange} />
+      <input className="form-control mb-3 text-center" name="full_name" placeholder="Full Name" value={form.full_name} onChange={handleChange} />
+      <input className="form-control mb-3 text-center" name="email" placeholder="Email" value={form.email} onChange={handleChange} />
+      <input className="form-control mb-3 text-center" name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} />
+      <input className="form-control mb-3 text-center" name="address" placeholder="Address" value={form.address} onChange={handleChange} />
       <button className="btn btn-primary w-100 mb-2" type="submit">Save</button>
       <a href="/" className="d-block text-center">or get back to contacts</a>
     </form>
